@@ -1,0 +1,2 @@
+wavenumbers = "[^\\x00][^\\x00][^\\x00]\\x00\\x00\\x00\\x00\\x00[^\\x00][^\\x00][^\\x00]\\x00\\x00\\x00\\x00\\x00o\\x12\\x83:"
+image-metadata = 0xffff7f7fffff7ff

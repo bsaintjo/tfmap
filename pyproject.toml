@@ -1,13 +1,24 @@
 [project]
 name = "tfmap"
 version = "0.1.0"
-description = "Add your description here"
+description = "Analyzing ThermoFisher Omnic Atlus MAP files"
 readme = "README.md"
 authors = [
     { name = "Brandon T. P. Saint-John", email = "saint-john@lbl.gov" }
 ]
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "numpy>=2.2.2",
+    "pillow>=11.1.0",
+    "polars>=1.31.0",
+    "tqdm>=4.67.1",
+]
+
+[project.optional-dependencies]
+full = [
+    "matplotlib>=3.10.3",
+    "ipykernel>=6.29.5",
+]
 
 [project.scripts]
 tfmap = "tfmap.__main__:main"
