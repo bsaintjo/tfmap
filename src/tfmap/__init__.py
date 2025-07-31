@@ -119,10 +119,14 @@ def _parse_file_size(xs: bytes) -> tuple[int, bytes]:
     return file_size, xs[4:]
 
 
-def _parse_spectra_frame(xs: bytes, n_wavenumbers: int) -> tuple[list[float], bytes]:
+def _parse_spectra_frame(
+    xs: bytes, n_wavenumbers: int
+) -> tuple[list[float], bytes]:
     xs = xs[84:]  # Skip 84 bytes of metadata
     end_position = n_wavenumbers * 4
-    acc = np.frombuffer(xs[:end_position], dtype=np.float32, count=n_wavenumbers)
+    acc = np.frombuffer(
+        xs[:end_position], dtype=np.float32, count=n_wavenumbers
+    )
     xs = xs[end_position:]
     # acc = []
     # for _ in range(n_wavenumbers):
@@ -173,12 +177,15 @@ class Atlus(object):
         return self.pixels
 
     @staticmethod
-    def from_map_filepath(filepath: str | Path, parse_spectra: bool = True) -> Self:
+    def from_map_filepath(
+        filepath: str | Path, parse_spectra: bool = True
+    ) -> Self:
         """
         Parse a ThermoFisher Omnic Atlus file, and returns an Atlus object.
 
-        By default, this method will extract both the image and the spectra. Extracting the spectra can
-        take significantly longer, and if its not needed, set parse_spectra to False.
+        By default, this method will extract both the image and the spectra.
+        Extracting the spectra can take significantly longer, and if its not
+        needed, set parse_spectra to False.
 
         When parse_spectra is False, both
         """
@@ -202,7 +209,9 @@ class Atlus(object):
         atlus_idx = full_file.find(_IMAGE_METADATA_SECTION_MARKER)
         slop = 8  # Extra information we don't care about at the moment
 
-        file = full_file[atlus_idx + len(_IMAGE_METADATA_SECTION_MARKER) + slop :]
+        file = full_file[
+            atlus_idx + len(_IMAGE_METADATA_SECTION_MARKER) + slop :
+        ]
         # Number of spectra * 4 (number of bytes in 32-bit float) * 2 (pairs of positions)
         end_position = n_spectra * 4 * 2
         positions = np.frombuffer(file[:end_position], dtype=np.float32)
@@ -249,7 +258,9 @@ class Atlus(object):
 
             for idx in tqdm.tqdm(range(n_spectra), desc="Parsing spectra"):
                 try:
-                    parsed_spectra, data = _parse_spectra_frame(data, n_wavenumbers)
+                    parsed_spectra, data = _parse_spectra_frame(
+                        data, n_wavenumbers
+                    )
                 except ValueError:
                     warnings.warn(
                         f"""Failed to complete parsing spectra expected number of spectra\n
@@ -282,12 +293,19 @@ class Atlus(object):
             spectra=np.array(
                 [
                     x[1]
-                    for x in sorted(list(self.spectra_dict.items()), key=lambda x: x[0])
+                    for x in sorted(
+                        list(self.spectra_dict.items()), key=lambda x: x[0]
+                    )
                 ]
             ),
             wavenumbers=np.linspace(650, 4000, 3475),
             spectra_coordinates=np.array(
-                [x[1] for x in sorted(list(self.pixels.items()), key=lambda x: x[0])]
+                [
+                    x[1]
+                    for x in sorted(
+                        list(self.pixels.items()), key=lambda x: x[0]
+                    )
+                ]
             ),
         )
 
@@ -304,8 +322,12 @@ class Atlus(object):
            [0]     [1]
         ```
         """
-        x_axis = np.array([coord[:2] for coord in self.image_coords.values()]).ravel()
-        y_axis = np.array([coord[2:] for coord in self.image_coords.values()]).ravel()
+        x_axis = np.array(
+            [coord[:2] for coord in self.image_coords.values()]
+        ).ravel()
+        y_axis = np.array(
+            [coord[2:] for coord in self.image_coords.values()]
+        ).ravel()
         return [x_axis.min(), x_axis.max(), y_axis.min(), y_axis.max()]
 
     def cell_segmented(self, seg_image) -> dict[int, bool]:
@@ -314,17 +336,23 @@ class Atlus(object):
         acc = dict()
         for idx, (x, y) in self.pixels.items():
             proj_col = round(((x - x_min) / (x_max - x_min)) * seg_cols)
-            proj_row = round(seg_rows - ((y - y_min) / (y_max - y_min)) * seg_rows)
+            proj_row = round(
+                seg_rows - ((y - y_min) / (y_max - y_min)) * seg_rows
+            )
             acc[idx] = seg_image[proj_row][proj_col]
         return acc
 
-    def pixels_projected(self, rows: int, cols: int) -> dict[int, tuple[int, int]]:
+    def pixels_projected(
+        self, rows: int, cols: int
+    ) -> dict[int, tuple[int, int]]:
         seg_rows, seg_cols = rows, cols
         [x_min, x_max, y_min, y_max] = self.image_extent()
         acc = dict()
         for idx, (x, y) in self.pixels.items():
             proj_col = round(((x - x_min) / (x_max - x_min)) * seg_cols)
-            proj_row = round(seg_rows - ((y - y_min) / (y_max - y_min)) * seg_rows)
+            proj_row = round(
+                seg_rows - ((y - y_min) / (y_max - y_min)) * seg_rows
+            )
             acc[idx] = (proj_row, proj_col)
         return acc
 
@@ -336,7 +364,9 @@ class Atlus(object):
             ys.append(y)
         return [min(xs), max(xs), min(ys), max(ys)]
 
-    def _pixels_projected_height_width(self, rows: int, cols: int) -> tuple[int, int]:
+    def _pixels_projected_height_width(
+        self, rows: int, cols: int
+    ) -> tuple[int, int]:
         [xmin, xmax, ymin, ymax] = self._pixels_projected_extent(rows, cols)
         return (abs(ymax - ymin), abs(xmax - xmin))
 
@@ -349,7 +379,9 @@ class Atlus(object):
         extent = self.image_extent()
         ax.set_xlim(*extent[:2])
         ax.set_ylim(*extent[2:])
-        extent = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
+        extent = ax.get_window_extent().transformed(
+            fig.dpi_scale_trans.inverted()
+        )
         fig.savefig(
             bs,
             format="png",
@@ -364,7 +396,9 @@ class Atlus(object):
     def _map_image(self) -> Image.Image:
         return Image.open(self._map_image_bytes())
 
-    def _plot_rgb_image(self, ax: Any, plot_kwargs: Optional[Dict[str, str]] = None):
+    def _plot_rgb_image(
+        self, ax: Any, plot_kwargs: Optional[Dict[str, str]] = None
+    ):
         for idx, image in enumerate(self.images):
             ax.imshow(image, extent=self.image_coords[idx])
         extent = self.image_extent()
@@ -414,7 +448,9 @@ class Atlus(object):
         ax[0].set_ylabel("Position (um)")
         ax[0].set_xlabel("Position (um)")
         pixel_xs, pixel_ys = list(zip(*self.pixels.values()))
-        scatter = ax[0].scatter(pixel_xs, pixel_ys, c="red", marker="x", linewidths=0.5)
+        scatter = ax[0].scatter(
+            pixel_xs, pixel_ys, c="red", marker="x", linewidths=0.5
+        )
 
         cursor = mplcursors.cursor(scatter)
 
@@ -451,10 +487,14 @@ class Atlus(object):
     def _atlus_to_df(self) -> pl.DataFrame:
         pixel_idx, pixel_pos = list(zip(*self.pixels.items()))
         pixel_x, pixel_y = list(zip(*pixel_pos))
-        pixel_df = pl.DataFrame(dict(idx=pixel_idx, pixel_x=pixel_x, pixel_y=pixel_y))
+        pixel_df = pl.DataFrame(
+            dict(idx=pixel_idx, pixel_x=pixel_x, pixel_y=pixel_y)
+        )
 
         spectra_idx, spectra = list(zip(*self.spectra_dict.items()))
         spectra_df = pl.DataFrame(np.array(spectra))
-        spectra_df = spectra_df.with_columns(pl.Series(name="idx", values=spectra_idx))
+        spectra_df = spectra_df.with_columns(
+            pl.Series(name="idx", values=spectra_idx)
+        )
 
         return pixel_df.join(spectra_df, on="idx").drop("idx")
