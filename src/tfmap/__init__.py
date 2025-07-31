@@ -1,6 +1,7 @@
 """
 .. include:: ../../README.md
 """
+
 import math
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Self
@@ -152,9 +153,35 @@ class Atlus(object):
         self.filepath = filepath
         """@private"""
 
+    def spectra(self) -> dict[int, ArrayLike]:
+        """
+        Returns a dictionary with the key as the index of the spectra and the values are numpy arrays of float values representing the spectra
+
+        The index is the same as the index returned in Atlus.spectra.
+        """
+        return self.spectra_dict
+
+    def spectra_coordinates(self) -> dict[int, tuple[float, float]]:
+        """
+        Returns a dictionary with the key as the index of the spectra and the values are tuples representing
+        the coordinates of the spectra.
+
+        Useful for comparing the spectra spatially.
+        The coordinates are on the same coordinate system used for the embedded image.
+        The index is the same as the index returned in Atlus.spectra.
+        """
+        return self.pixels
+
     @staticmethod
     def from_map_filepath(filepath: str | Path, parse_spectra: bool = True) -> Self:
-        """Parse a ThermoFisher Omnic Atlus file, and returns an Atlus object."""
+        """
+        Parse a ThermoFisher Omnic Atlus file, and returns an Atlus object.
+
+        By default, this method will extract both the image and the spectra. Extracting the spectra can
+        take significantly longer, and if its not needed, set parse_spectra to False.
+
+        When parse_spectra is False, both
+        """
         pixels = dict()
         with open(filepath, "rb") as full_file:
             full_file = full_file.read()
@@ -206,7 +233,9 @@ class Atlus(object):
         images = _parse_images_from_map_bytes(full_file)
 
         # N Wavelengths
-        n_wavelengths_section = re.search(_N_WAVENUMBERS_SECTION_MARKER, full_file).end()
+        n_wavelengths_section = re.search(
+            _N_WAVENUMBERS_SECTION_MARKER, full_file
+        ).end()
         n_wavenumbers = struct.unpack(
             "H", full_file[n_wavelengths_section : n_wavelengths_section + 2]
         )[0]
@@ -428,7 +457,4 @@ class Atlus(object):
         spectra_df = pl.DataFrame(np.array(spectra))
         spectra_df = spectra_df.with_columns(pl.Series(name="idx", values=spectra_idx))
 
-        return (
-            pixel_df.join(spectra_df, on="idx")
-            .drop("idx")
-        )
+        return pixel_df.join(spectra_df, on="idx").drop("idx")
