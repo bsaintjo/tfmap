@@ -2,7 +2,7 @@
 
 - [Analyze ThermoFisher Omnic Atlus MAP files with Python](#analyze-thermofisher-omnic-atlus-map-files-with-python)
   - [Usage](#usage)
-    - [From Omnic](#from-omnic)
+    - [Jupyter notebook](#jupyter-notebook)
     - [Command line](#command-line)
   - [Installation](#installation)
     - [via `pip`](#via-pip)
@@ -12,7 +12,9 @@
 
 ## Usage
 
-### From Omnic
+### Jupyter notebook
+
+Usage of the Python package can be found in the [example Jupyter notebook](notebooks/example.ipynb).
 
 ### Command line
 
@@ -38,6 +40,9 @@ pip install -e .
 ```bash
 docker build -t tfmap .
 docker run -it --rm tfmap --help
+
+# Example command
+docker run --rm -it -v "$PWD":/cwd tfmap export-image -i /cwd/data/test.map -o /cwd/result.png
 ```
 
 ## Why use this?

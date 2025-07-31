@@ -2,6 +2,7 @@ import argparse
 import sys
 from importlib.metadata import version
 from tfmap import Atlus
+from PIL.PngImagePlugin import PngInfo
 
 try:
     __version__ = version("tfmap")
@@ -11,13 +12,16 @@ except Exception:
 
 def export_image(input_file: str, output_file: str):
     atlus = Atlus.from_map_filepath(input_file, parse_spectra=False)
-    print(f"This is where we'd process {input_file} and save an image to {output_file}")
+    metadata = PngInfo()
+    extent_str = ",".join([str(x) for x in atlus.image_extent()])
+    metadata.add_text("extent", extent_str)
+    image = atlus._map_image()
+    image.save(output_file, pnginfo=metadata, format="PNG")
 
 
 def export_spectra(input_file: str, output_file: str):
     atlus = Atlus.from_map_filepath(input_file, parse_spectra=True)
     df = atlus._atlus_to_df()
-    print(f"Exporting spectra from {input_file} to {output_file}")
     df.write_csv(output_file)
 
 
@@ -28,10 +32,19 @@ def main() -> None:
     parser.add_argument(
         "--version", action="version", version=f"%(prog)s {__version__}"
     )
-    subparsers = parser.add_subparsers(dest="command", help="Subcommand to run")
+    subparsers = parser.add_subparsers(
+        dest="command", help="Subcommand to run"
+    )
 
     image_parser = subparsers.add_parser(
-        "export-image", help="Export an image from ThermoFisher Omnic Atlus MAP file"
+        "export-image",
+        help="Export an image from ThermoFisher Omnic Atlus MAP file",
+        description="""
+Extracts the embedded image from within a ThermoFisher Omnic Atlus file.
+The output image is saved as a PNG file.
+Image coordinates are saved as metadata within the file with the extent key
+and matches the usage as the Atlus.image_extent method.
+""",
     )
     image_parser.add_argument(
         "-i", "--input", required=True, help="Path to Atlus MAP file"

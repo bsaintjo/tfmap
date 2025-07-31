@@ -4,7 +4,7 @@
 
 import math
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Self
+from typing import Any, Callable, Optional, Self
 import re
 import io
 import struct
@@ -342,7 +342,7 @@ class Atlus(object):
             acc[idx] = seg_image[proj_row][proj_col]
         return acc
 
-    def pixels_projected(
+    def _pixels_projected(
         self, rows: int, cols: int
     ) -> dict[int, tuple[int, int]]:
         seg_rows, seg_cols = rows, cols
@@ -359,7 +359,7 @@ class Atlus(object):
     def _pixels_projected_extent(self, rows: int, cols: int) -> list[int]:
         xs = []
         ys = []
-        for x, y in self.pixels_projected(rows, cols).values():
+        for x, y in self._pixels_projected(rows, cols).values():
             xs.append(x)
             ys.append(y)
         return [min(xs), max(xs), min(ys), max(ys)]
@@ -396,9 +396,10 @@ class Atlus(object):
     def _map_image(self) -> Image.Image:
         return Image.open(self._map_image_bytes())
 
-    def _plot_rgb_image(
-        self, ax: Any, plot_kwargs: Optional[Dict[str, str]] = None
-    ):
+    def plot_rgb_image(self, ax: Any):
+        """
+        Plot the embedded image on a matplotlib Axes ax.
+        """
         for idx, image in enumerate(self.images):
             ax.imshow(image, extent=self.image_coords[idx])
         extent = self.image_extent()
@@ -406,11 +407,6 @@ class Atlus(object):
         ax.set_ylim(*extent[2:])
         ax.set_ylabel("Position (um)")
         ax.set_xlabel("Position (um)")
-        # pixel_xs, pixel_ys = list(zip(*self.pixels.values()))
-        # _plot_kwargs = dict(c="red", marker="x", linewidths=0.5)
-        # if plot_kwargs is not None:
-        #     _plot_kwargs.update(plot_kwargs)
-        # ax.scatter(pixel_xs, pixel_ys, c="red", marker="x", linewidths=0.5)
 
     def _pixel_xs_ys(self) -> tuple[list[float], list[float]]:
         pixel_xs, pixel_ys = list(zip(*self.pixels.values()))
