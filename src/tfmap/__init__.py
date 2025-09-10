@@ -281,7 +281,7 @@ class Atlus(object):
             filepath=str(filepath),
         )
 
-    def _export_npz(self, filepath, wavenumbers: Optional[np.ndarray]):
+    def _export_npz(self, filepath, wavenumbers: Optional[np.ndarray] = None):
         """Export Atlus data with image, coordinates, and spectra to an NPZ file."""
         if wavenumbers is None:
             wavenumbers = np.linspace(650, 4000, 3475)
@@ -298,7 +298,7 @@ class Atlus(object):
                     )
                 ]
             ),
-            wavenumbers=np.linspace(650, 4000, 3475),
+            wavenumbers=wavenumbers,
             spectra_coordinates=np.array(
                 [
                     x[1]

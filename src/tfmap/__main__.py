@@ -1,6 +1,9 @@
 import argparse
+from pathlib import Path
 import sys
 from importlib.metadata import version
+import warnings
+
 from tfmap import Atlus
 from PIL.PngImagePlugin import PngInfo
 
@@ -23,6 +26,12 @@ def export_spectra(input_file: str, output_file: str):
     atlus = Atlus.from_map_filepath(input_file, parse_spectra=True)
     df = atlus._atlus_to_df()
     df.write_csv(output_file)
+
+
+def export_spectra_npz(input_file: str, output_file: str):
+    atlus = Atlus.from_map_filepath(input_file, parse_spectra=True)
+    atlus._export_npz(output_file)
+    # df.write_csv(output_file)
 
 
 def main() -> None:
@@ -57,11 +66,15 @@ and matches the usage as the Atlus.image_extent method.
         "export-spectra",
         help="Export spectra data from ThermoFisher Omnic Atlus MAP file",
     )
+
     spectra_parser.add_argument(
         "-i", "--input", required=True, help="Path to Atlus MAP file"
     )
     spectra_parser.add_argument(
-        "-o", "--output", required=True, help="Output file path as csv"
+        "-o",
+        "--output",
+        required=True,
+        help="Output file path, use npz/csv for filetype",
     )
     spectra_parser.add_argument(
         "--quiet",
@@ -75,7 +88,16 @@ and matches the usage as the Atlus.image_extent method.
     if args.command == "export-image":
         export_image(args.input, args.output)
     elif args.command == "export-spectra":
-        export_spectra(args.input, args.output)
+        match ext := Path(args.output).suffix:
+            case ".csv":
+                export_spectra(args.input, args.output)
+            case ".npz":
+                export_spectra_npz(args.input, args.output)
+            case _:
+                warnings.warn(
+                    f"Unrecognized file extension: '{ext}', must be .csv or .npz"
+                )
+                sys.exit(2)
     else:
         parser.print_help()
         sys.exit(1)
