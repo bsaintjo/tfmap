@@ -121,7 +121,7 @@ def _parse_file_size(xs: bytes) -> tuple[int, bytes]:
 
 def _parse_spectra_frame(
     xs: bytes, n_wavenumbers: int
-) -> tuple[list[float], bytes]:
+) -> tuple[ArrayLike, bytes]:
     xs = xs[84:]  # Skip 84 bytes of metadata
     end_position = n_wavenumbers * 4
     acc = np.frombuffer(
@@ -140,9 +140,9 @@ class Atlus(object):
     def __init__(
         self,
         images: list[Image.Image],
-        image_coords: dict[int, list[float]],
+        image_coords: dict[int, tuple[float, float, float, float]],
         pixels: dict[int, tuple[float, float]],
-        spectra_dict: dict[int, list[float]],
+        spectra_dict: dict[int, ArrayLike],
         filepath: str,
     ):
         """@private"""
@@ -251,7 +251,7 @@ class Atlus(object):
         _LOGGER.info(f"n wavenumbers: {n_wavenumbers}")
 
         # Spectra
-        spectra_dict: dict[int, list[float]] = dict()
+        spectra_dict: dict[int, ArrayLike] = dict()
 
         if parse_spectra:
             data = full_file[spectra_frame_idx:]
