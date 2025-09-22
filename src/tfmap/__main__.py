@@ -24,7 +24,7 @@ def export_image(input_file: str, output_file: str):
 
 def export_spectra(input_file: str, output_file: str):
     atlus = Atlus.from_map_filepath(input_file, parse_spectra=True)
-    df = atlus._atlus_to_df()
+    df = atlus.to_polars()
     df.write_csv(output_file)
 
 
