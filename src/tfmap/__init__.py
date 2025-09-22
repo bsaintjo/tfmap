@@ -480,7 +480,7 @@ class Atlus(object):
 
         return Image.open(bs)._repr_jpeg_()
 
-    def _atlus_to_df(self) -> pl.DataFrame:
+    def to_polars(self) -> pl.DataFrame:
         pixel_idx, pixel_pos = list(zip(*self.pixels.items()))
         pixel_x, pixel_y = list(zip(*pixel_pos))
         pixel_df = pl.DataFrame(
