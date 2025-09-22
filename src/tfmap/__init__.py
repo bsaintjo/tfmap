@@ -309,7 +309,7 @@ class Atlus(object):
             ),
         )
 
-    def image_extent(self) -> list[float, float, float, float]:
+    def image_extent(self) -> list[float]:
         """
         Return the extent representing the maximum and minimum coordinates of the MAP file image.
 
