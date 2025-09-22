@@ -176,9 +176,9 @@ class Atlus(object):
         """
         return self.pixels
 
-    @staticmethod
+    @classmethod
     def from_map_filepath(
-        filepath: str | Path, parse_spectra: bool = True
+        cls, filepath: str | Path, parse_spectra: bool = True
     ) -> Self:
         """
         Parse a ThermoFisher Omnic Atlus file, and returns an Atlus object.
@@ -273,7 +273,7 @@ class Atlus(object):
                 data = data[next_frame_idx:]
                 spectra_dict[idx] = parsed_spectra
 
-        return Atlus(
+        return cls(
             images=images,
             image_coords=image_coords,
             pixels=pixels,
