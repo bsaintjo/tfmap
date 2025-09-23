@@ -481,6 +481,7 @@ class Atlus(object):
         return Image.open(bs)._repr_jpeg_()
 
     def to_polars(self) -> pl.DataFrame:
+        wn = np.linspace(650, 4000, 3475)
         pixel_idx, pixel_pos = list(zip(*self.pixels.items()))
         pixel_x, pixel_y = list(zip(*pixel_pos))
         pixel_df = pl.DataFrame(
@@ -489,6 +490,7 @@ class Atlus(object):
 
         spectra_idx, spectra = list(zip(*self.spectra_dict.items()))
         spectra_df = pl.DataFrame(np.array(spectra))
+        spectra_df.columns = [f"wavenumber_{x:.2f}" for x in wn]
         spectra_df = spectra_df.with_columns(
             pl.Series(name="idx", values=spectra_idx)
         )
