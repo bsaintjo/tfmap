@@ -20,9 +20,9 @@ def umap_to_kmean(
     ]
     X = df.select(cols).to_numpy()
     components = umap.UMAP(
-        densmap=True, n_neighbors=n_neighbors
+        densmap=True, n_neighbors=n_neighbors, random_state=717
     ).fit_transform(X)
-    split = KMeans(n_clusters=2).fit_predict(components)
+    split = KMeans(n_clusters=2, random_state=717).fit_predict(components)
     return df.with_columns(
         pc1=components[:, 0], pc2=components[:, 1], split=split
     )
