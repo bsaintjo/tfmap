@@ -492,7 +492,8 @@ class Atlus(object):
         spectra_df = pl.DataFrame(np.array(spectra))
         spectra_df.columns = [f"wavenumber_{x:.2f}" for x in wn]
         spectra_df = spectra_df.with_columns(
-            pl.Series(name="idx", values=spectra_idx)
+            pl.Series(name="idx", values=spectra_idx),
+            filepath=pl.lit(self.filepath),
         )
 
         return pixel_df.join(spectra_df, on="idx").drop("idx")
